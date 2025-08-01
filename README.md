@@ -7,6 +7,14 @@ A machine learning pipeline for classifying the thermal phase of 2D Ising model 
 • CNN (Convolutional Neural Network)
 • Vision Transformer (ViT)
 
+## References
+
+- Carrasquilla, J., & Melko, R. G. (2017). ["Machine learning phases of matter"](https://www.nature.com/articles/nphys4035). *Nature Physics, 13, 431–434.*
+- Kara, O., & Yanik, M. E. (2021). ["Predicting order parameters in 2D Ising models using Vision Transformers"](https://arxiv.org/abs/2109.13925). *arXiv:2109.13925.*
+- Civitcioglu, C. (2020). ["Transfer Learning Across Lattice Types Using Convolutional Neural Networks"](https://warwick.ac.uk/fac/sci/physics/staff/academic/roemer/publications/Thesis_Civitcioglu_2020.pdf). PhD Thesis, Warwick.
+- Geirhos, R., et al. (2020). ["Shortcut Learning in Deep Neural Networks"](https://arxiv.org/abs/2004.07780). *arXiv:2004.07780.*
+- [statmechsims.com](https://www.statmechsims.com/models) — Open source Ising simulation image data.
+
 The project benchmarks these models on synthetic lattice data to explore their effectiveness at detecting phase transitions.
 
 Dataset from Kaggle:
