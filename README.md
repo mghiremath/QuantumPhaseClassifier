@@ -18,22 +18,22 @@ import kagglehub
 path = kagglehub.dataset_download("swarnainece/ising-lattice-images")
 ```
 
-    1.	Install requirements:
+1. Install requirements:
 
-    ```bash
-    #!/bin/bash
-    pip install torch torchvision matplotlib pandas scikit-learn
-    ```
+```bash
+#!/bin/bash
+pip install torch torchvision matplotlib pandas scikit-learn
+```    
 
-    2.	Train the MLP model: Trains model, plots test accuracy per epoch, and saves model checkpoint to results/.
+2. Train the MLP model: Trains model, plots test accuracy per epoch, and saves model checkpoint to results/.
 
-    ```bash
-    cd src
-    python train.py
-    ```
+```bash
+cd src
+python train.py
+```
 
-    3.	Evaluate the model: Loads checkpoint, prints test accuracy, and shows confusion matrix.
+3. Evaluate the model: Loads checkpoint, prints test accuracy, and shows confusion matrix.
 
-    ```bash
-    python eval.py
-    ```
+```bash
+python eval.py
+```
