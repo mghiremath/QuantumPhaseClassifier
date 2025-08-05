@@ -1,4 +1,5 @@
 from models.mlp import MLPModel
+from models.cnn import CNNModel
 from utils import get_image_dataloaders
 import torch
 import torch.nn as nn
@@ -6,11 +7,20 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import os
 
-def train_mlp(epochs=10, batch_size=32, lr=1e-3, device='cpu'):
-    train_loader, test_loader = get_image_dataloaders("../data", batch_size=batch_size, flatten=True)
-    model = MLPModel(input_dim=370*370, hidden_dim=512, num_classes=3).to(device)    
+def train_model(model_type, epochs=10, batch_size=32, lr=1e-3, device='mps'):
+
+    # CNN model
+    if model_type == 'CNN':
+        train_loader, test_loader = get_image_dataloaders("../data", batch_size=batch_size, flatten=False)
+        model = CNNModel(num_classes=3).to(device)
+
+    # MLP model
+    elif model_type == 'MLP':
+        train_loader, test_loader = get_image_dataloaders("../data", batch_size=batch_size, flatten=True)
+        model = MLPModel(input_dim=370*370, hidden_dim=512, num_classes=3).to(device)    
+    
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
     test_accuracy = []
     for epoch in range(epochs):
         model.train()
@@ -42,17 +52,14 @@ def train_mlp(epochs=10, batch_size=32, lr=1e-3, device='cpu'):
     plt.xticks(epochs_list)
     plt.xlabel('Epoch')
     plt.ylabel('Test Accuracy (%)')
-    plt.title('MLP Test Accuracy with Masked Label Box')
+    plt.title(f'{model_type} Test Accuracy with Masked Label Box')
     plt.ylim(85, 101)
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.tight_layout()
     os.makedirs("results", exist_ok=True)
-    plt.savefig("results/mlp_accuracy_plot.png")
+    plt.savefig(f"results/{model_type}_accuracy_plot.png")
     plt.show()
     
-    # Save the model
-    torch.save(model.state_dict(), "results/mlp_checkpoint.pt")
-    print("Model saved as mlp_checkpoint.pt in results/ directory.")
     
 if __name__ == "__main__":
-    train_mlp()
+    train_model('MLP')
