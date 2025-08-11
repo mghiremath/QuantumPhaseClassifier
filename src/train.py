@@ -1,5 +1,6 @@
 from models.mlp import MLPModel
 from models.cnn import CNNModel
+from models.vit import ViTModel
 from utils import get_image_dataloaders
 import torch
 import torch.nn as nn
@@ -18,6 +19,19 @@ def train_model(model_type, epochs=10, batch_size=32, lr=1e-3, device='mps'):
     elif model_type == 'MLP':
         train_loader, test_loader = get_image_dataloaders("../data", batch_size=batch_size, flatten=True)
         model = MLPModel(input_dim=370*370, hidden_dim=512, num_classes=3).to(device)    
+    
+    # ViT model
+    elif model_type == 'ViT':
+        train_loader, test_loader = get_image_dataloaders("../data", batch_size=batch_size, flatten=False)
+        model = ViTModel(
+            img_size=370, patch_size=37, in_chans=1, num_classes=3,
+            embed_dim=64, depth=3, num_heads=2,
+            mlp_ratio=3, dropout=0.2
+        ).to(device)
+        # stronger regularization for ViT
+        weight_decay = 1e-4
+    else:
+        raise ValueError("model_type must be one of: 'CNN', 'MLP', 'ViT'")
     
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
@@ -62,4 +76,4 @@ def train_model(model_type, epochs=10, batch_size=32, lr=1e-3, device='mps'):
     
     
 if __name__ == "__main__":
-    train_model('MLP')
+    train_model('ViT')
