@@ -1,4 +1,3 @@
-# models/vit.py
 import torch
 import torch.nn as nn
 import math
@@ -36,9 +35,11 @@ class TransformerEncoder(nn.Module):
         return x
 
 class ViTModel(nn.Module):
-    def __init__(self, img_size=370, patch_size=37, in_chans=1, num_classes=3,
-                 embed_dim=64, depth=3, num_heads=2, mlp_ratio=2, dropout=0.2):
+    def __init__(self, img_size=370, patch_size=37, in_chans=1, out_dim=3,
+                 embed_dim=64, depth=3, num_heads=2, mlp_ratio=2, dropout=0.2, num_classes=None):
         super().__init__()
+        if num_classes is not None:
+            out_dim = num_classes
         self.patch_embed = PatchEmbedding(img_size, patch_size, in_chans, embed_dim)
         num_patches = (img_size // patch_size) ** 2
 
@@ -51,7 +52,7 @@ class ViTModel(nn.Module):
             for _ in range(depth)
         ])
         self.norm = nn.LayerNorm(embed_dim)
-        self.head = nn.Linear(embed_dim, num_classes)
+        self.head = nn.Linear(embed_dim, out_dim)
 
         nn.init.trunc_normal_(self.pos_embed, std=0.02)
         nn.init.trunc_normal_(self.cls_token, std=0.02)

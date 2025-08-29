@@ -23,7 +23,7 @@ class IsingFolderDataset(Dataset):
     Loads Ising images from folders labeled by temperature.
     Crops to central lattice, maps grayscale to [-1, 1].
     """
-    def __init__(self, data_dir, flatten=True, transform=None):
+    def __init__(self, data_dir, flatten=True, transform=None, target_type='class'):
         self.samples = []
         self.flatten = flatten
         self.transform = transform or transforms.Compose([
@@ -33,6 +33,7 @@ class IsingFolderDataset(Dataset):
             transforms.ToTensor(),  # [C, H, W]
             transforms.Lambda(lambda x: x * 2 - 1),  # [0,1] -> [-1,1]
         ])
+        self.target_type = target_type  # 'class' or 'regression'
         temp_pat = re.compile(r'Temp=(\d+)-(\d+)')
         for folder in os.listdir(data_dir):
             folder_path = os.path.join(data_dir, folder)
@@ -41,13 +42,16 @@ class IsingFolderDataset(Dataset):
             m = temp_pat.match(folder)
             if m:
                 temp = float(m.group(1) + "." + m.group(2))
-                # Map temperature to label
-                if temp < 2.0:
-                    label = 0
-                elif temp < 2.5:
-                    label = 1
+                # Map to class or keep continuous temp based on target_type
+                if self.target_type == 'class':
+                    if temp < 2.0:
+                        label = 0
+                    elif temp < 2.5:
+                        label = 1
+                    else:
+                        label = 2
                 else:
-                    label = 2
+                    label = temp
                 for fname in os.listdir(folder_path):
                     if fname.endswith(".png"):
                         self.samples.append((os.path.join(folder_path, fname), label))
@@ -61,7 +65,11 @@ class IsingFolderDataset(Dataset):
         x = self.transform(img)  # [1, 370, 370]
         if self.flatten:
             x = x.view(-1)  # flatten for MLP: [1*370*370]
-        return x, torch.tensor(label).long()
+        if self.target_type == 'class':
+            y = torch.tensor(label).long()
+        else:
+            y = torch.tensor(label).float()
+        return x, y
 
 def get_image_dataloaders(
     data_dir,
@@ -69,12 +77,13 @@ def get_image_dataloaders(
     train_ratio=0.8,
     flatten=True,
     shuffle=True,
-    seed=42
+    seed=42,
+    target_type='class'
 ):
     """
     Splits dataset into train/test DataLoaders.
     """
-    ds = IsingFolderDataset(data_dir, flatten=flatten)
+    ds = IsingFolderDataset(data_dir, flatten=flatten, target_type=target_type)
     train_len = int(train_ratio * len(ds))
     test_len = len(ds) - train_len
     train_ds, test_ds = random_split(ds, [train_len, test_len], generator=torch.Generator().manual_seed(seed))
